@@ -58,6 +58,7 @@ private:
     static int employeeCount;
     static int leaveCount;
     static int salaryCount;
+    static int attendanceCount;
 
 public:
     // Get current date as string
@@ -148,44 +149,52 @@ public:
 
     // Calculate days between two dates
     static int calculateDays(const string& startDate, const string& endDate) {
-        int startYear = stoi(startDate.substr(0, 4));
-        int startMonth = stoi(startDate.substr(5, 2));
-        int startDay = stoi(startDate.substr(8, 2));
+        try {
+            int startYear = stoi(startDate.substr(0, 4));
+            int startMonth = stoi(startDate.substr(5, 2));
+            int startDay = stoi(startDate.substr(8, 2));
 
-        int endYear = stoi(endDate.substr(0, 4));
-        int endMonth = stoi(endDate.substr(5, 2));
-        int endDay = stoi(endDate.substr(8, 2));
+            int endYear = stoi(endDate.substr(0, 4));
+            int endMonth = stoi(endDate.substr(5, 2));
+            int endDay = stoi(endDate.substr(8, 2));
 
-        tm startTm = {0};
-        startTm.tm_year = startYear - 1900;
-        startTm.tm_mon = startMonth - 1;
-        startTm.tm_mday = startDay;
+            tm startTm = {0};
+            startTm.tm_year = startYear - 1900;
+            startTm.tm_mon = startMonth - 1;
+            startTm.tm_mday = startDay;
 
-        tm endTm = {0};
-        endTm.tm_year = endYear - 1900;
-        endTm.tm_mon = endMonth - 1;
-        endTm.tm_mday = endDay;
+            tm endTm = {0};
+            endTm.tm_year = endYear - 1900;
+            endTm.tm_mon = endMonth - 1;
+            endTm.tm_mday = endDay;
 
-        time_t start = mktime(&startTm);
-        time_t end = mktime(&endTm);
+            time_t start = mktime(&startTm);
+            time_t end = mktime(&endTm);
 
-        return difftime(end, start) / (60 * 60 * 24);
+            return static_cast<int>(difftime(end, start) / (60 * 60 * 24));
+        } catch (...) {
+            return 0;
+        }
     }
 
     // Calculate working hours between two times
     static double calculateWorkingHours(const string& checkIn, const string& checkOut) {
-        int inHour = stoi(checkIn.substr(0, 2));
-        int inMin = stoi(checkIn.substr(3, 2));
-        int inSec = stoi(checkIn.substr(6, 2));
+        try {
+            int inHour = stoi(checkIn.substr(0, 2));
+            int inMin = stoi(checkIn.substr(3, 2));
+            int inSec = stoi(checkIn.substr(6, 2));
 
-        int outHour = stoi(checkOut.substr(0, 2));
-        int outMin = stoi(checkOut.substr(3, 2));
-        int outSec = stoi(checkOut.substr(6, 2));
+            int outHour = stoi(checkOut.substr(0, 2));
+            int outMin = stoi(checkOut.substr(3, 2));
+            int outSec = stoi(checkOut.substr(6, 2));
 
-        double inTotal = inHour + inMin / 60.0 + inSec / 3600.0;
-        double outTotal = outHour + outMin / 60.0 + outSec / 3600.0;
+            double inTotal = inHour + inMin / 60.0 + inSec / 3600.0;
+            double outTotal = outHour + outMin / 60.0 + outSec / 3600.0;
 
-        return outTotal - inTotal;
+            return outTotal - inTotal;
+        } catch (...) {
+            return 0.0;
+        }
     }
 
     // Generate employee ID
@@ -236,16 +245,35 @@ public:
         return salaryCount;
     }
 
+    // Set attendance count (for loading from file)
+    static void setAttendanceCount(int count) {
+        attendanceCount = count;
+    }
+
+    // Get attendance count
+    static int getAttendanceCount() {
+        return attendanceCount;
+    }
+
+    // Generate attendance ID
+    static string generateAttendanceID() {
+        attendanceCount++;
+        return "ATT" + to_string(attendanceCount);
+    }
+
     // Clear input buffer
     static void clearInputBuffer() {
         cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        if (cin.rdbuf()->in_avail() > 0) {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
     }
 
     // Pause and wait for user input
     static void pause() {
         cout << "\nPress Enter to continue...";
-        cin.get();
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
 
     // Clear screen
@@ -377,13 +405,13 @@ public:
 
     // Convert string to lowercase
     static string toLower(string str) {
-        transform(str.begin(), str.end(), str.begin(), ::tolower);
+        transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return tolower(c); });
         return str;
     }
 
     // Convert string to uppercase
     static string toUpper(string str) {
-        transform(str.begin(), str.end(), str.begin(), ::toupper);
+        transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return toupper(c); });
         return str;
     }
 
@@ -392,6 +420,7 @@ public:
         size_t start = str.find_first_not_of(" \t\n\r");
         if (start == string::npos) return "";
         size_t end = str.find_last_not_of(" \t\n\r");
+        if (end < start) return "";
         return str.substr(start, end - start + 1);
     }
 };
@@ -400,6 +429,7 @@ public:
 int Utility::employeeCount = 0;
 int Utility::leaveCount = 0;
 int Utility::salaryCount = 0;
+int Utility::attendanceCount = 0;
 
 // ==================== FILE MANAGER CLASS ====================
 class FileManager {
@@ -416,8 +446,17 @@ public:
         size_t size = data.size();
         outFile.write(reinterpret_cast<char*>(&size), sizeof(size));
 
+        if (!outFile) {
+            outFile.close();
+            return false;
+        }
+
         for (const auto& item : data) {
             outFile.write(reinterpret_cast<const char*>(&item), sizeof(T));
+            if (!outFile) {
+                outFile.close();
+                return false;
+            }
         }
 
         outFile.close();
@@ -435,10 +474,18 @@ public:
 
         size_t size;
         inFile.read(reinterpret_cast<char*>(&size), sizeof(size));
+        
+        if (!inFile) {
+            inFile.close();
+            return data;
+        }
 
         for (size_t i = 0; i < size; i++) {
             T item;
             inFile.read(reinterpret_cast<char*>(&item), sizeof(T));
+            if (!inFile) {
+                break;
+            }
             data.push_back(item);
         }
 
@@ -828,15 +875,23 @@ public:
     // Check if late arrival (after 9:00 AM)
     bool isLateArrival() const {
         if (checkInTime.empty()) return false;
-        int hour = stoi(checkInTime.substr(0, 2));
-        return hour >= 9;
+        try {
+            int hour = stoi(checkInTime.substr(0, 2));
+            return hour >= 9;
+        } catch (...) {
+            return false;
+        }
     }
 
     // Check if early departure (before 5:00 PM)
     bool isEarlyDeparture() const {
         if (checkOutTime.empty()) return false;
-        int hour = stoi(checkOutTime.substr(0, 2));
-        return hour < 17;
+        try {
+            int hour = stoi(checkOutTime.substr(0, 2));
+            return hour < 17;
+        } catch (...) {
+            return false;
+        }
     }
 
     // Operator overloading for comparison
@@ -917,7 +972,7 @@ public:
              << setw(12) << startDate
              << setw(12) << endDate
              << setw(8) << totalDays
-             << setw(20) << reason.substr(0, 20)
+             << setw(20) << (reason.length() > 20 ? reason.substr(0, 20) : reason)
              << setw(12) << status << endl;
     }
 
@@ -1223,7 +1278,7 @@ public:
         int absentCount = 0;
 
         for (const auto& att : attendanceList) {
-            if (att.getDate().substr(0, 7) == month) {
+            if (att.getDate().length() >= 7 && att.getDate().substr(0, 7) == month) {
                 cout << left << setw(15) << att.getAttendanceId()
                      << setw(15) << att.getEmployeeId()
                      << setw(25) << att.getEmployeeName()
@@ -1534,16 +1589,54 @@ private:
         salaryList = FileManager::loadFromFile<Salary>("salary.dat");
         departments = FileManager::loadFromFile<Department>("department.dat");
 
-        // Update counters
-        if (!employees.empty()) {
-            Utility::setEmployeeCount(employees.size());
+        // Update counters based on actual IDs in data
+        int maxEmpId = 0;
+        for (const auto& emp : employees) {
+            string id = emp.getEmployeeId();
+            if (id.length() >= 4 && id.substr(0, 3) == "EMP") {
+                try {
+                    int num = stoi(id.substr(3));
+                    if (num > maxEmpId) maxEmpId = num;
+                } catch (...) {}
+            }
         }
-        if (!leaveList.empty()) {
-            Utility::setLeaveCount(leaveList.size());
+        Utility::setEmployeeCount(maxEmpId);
+
+        int maxLeaveId = 0;
+        for (const auto& lv : leaveList) {
+            string id = lv.getLeaveId();
+            if (id.length() >= 3 && id.substr(0, 2) == "LV") {
+                try {
+                    int num = stoi(id.substr(2));
+                    if (num > maxLeaveId) maxLeaveId = num;
+                } catch (...) {}
+            }
         }
-        if (!salaryList.empty()) {
-            Utility::setSalaryCount(salaryList.size());
+        Utility::setLeaveCount(maxLeaveId);
+
+        int maxSalaryId = 0;
+        for (const auto& sal : salaryList) {
+            string id = sal.getSalaryId();
+            if (id.length() >= 4 && id.substr(0, 3) == "SAL") {
+                try {
+                    int num = stoi(id.substr(3));
+                    if (num > maxSalaryId) maxSalaryId = num;
+                } catch (...) {}
+            }
         }
+        Utility::setSalaryCount(maxSalaryId);
+
+        int maxAttId = 0;
+        for (const auto& att : attendanceList) {
+            string id = att.getAttendanceId();
+            if (id.length() >= 4) {
+                try {
+                    int num = stoi(id.substr(3));
+                    if (num > maxAttId) maxAttId = num;
+                } catch (...) {}
+            }
+        }
+        Utility::setAttendanceCount(maxAttId);
     }
 
     // Save all data to files
@@ -2316,7 +2409,7 @@ private:
             double overtimeHours = 0.0;
 
             for (const auto& att : attendanceList) {
-                if (att.getEmployeeId() == emp.getEmployeeId() && att.getDate().substr(0, 7) == month) {
+                if (att.getEmployeeId() == emp.getEmployeeId() && att.getDate().length() >= 7 && att.getDate().substr(0, 7) == month) {
                     if (att.getStatus() == "Present") {
                         presentDays++;
                         overtimeHours += att.getOvertimeHours();
@@ -2328,7 +2421,7 @@ private:
             int leaveDays = 0;
             for (const auto& lv : leaveList) {
                 if (lv.getEmployeeId() == emp.getEmployeeId() && lv.isApproved()) {
-                    if (lv.getStartDate().substr(0, 7) == month) {
+                    if (lv.getStartDate().length() >= 7 && lv.getStartDate().substr(0, 7) == month) {
                         leaveDays += lv.getTotalDays();
                     }
                 }
@@ -2793,7 +2886,7 @@ private:
 
         // Check in
         Attendance att;
-        att.setAttendanceId("ATT" + to_string(attendanceList.size() + 1));
+        att.setAttendanceId(Utility::generateAttendanceID());
         att.setEmployeeId(emp->getEmployeeId());
         att.setEmployeeName(emp->getFullName());
         att.setDate(today);
@@ -2923,7 +3016,7 @@ private:
                      << setw(12) << lv.getStartDate()
                      << setw(12) << lv.getEndDate()
                      << setw(8) << lv.getTotalDays()
-                     << setw(20) << lv.getReason().substr(0, 20)
+                     << setw(20) << (lv.getReason().length() > 20 ? lv.getReason().substr(0, 20) : lv.getReason())
                      << setw(12) << lv.getStatus() << endl;
                 found = true;
             }
