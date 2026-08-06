@@ -739,22 +739,56 @@ public:
         getline(is, emp.fullName);
 
         cout << "Enter Gender (Male/Female): ";
-        is >> emp.gender;
+        is >> ws;
+        getline(is, emp.gender);
+        while (emp.gender != "Male" && emp.gender != "Female" && emp.gender != "male" && emp.gender != "female") {
+            cout << "Invalid gender! Please enter Male or Female: ";
+            is >> ws;
+            getline(is, emp.gender);
+        }
+        // Capitalize first letter
+        if (emp.gender[0] >= 'a' && emp.gender[0] <= 'z') {
+            emp.gender[0] = toupper(emp.gender[0]);
+        }
 
         cout << "Enter Age: ";
         is >> emp.age;
+        while (!Utility::isValidAge(emp.age)) {
+            cout << "Invalid age! Age must be between 18 and 65. Please enter again: ";
+            is >> emp.age;
+        }
+        Utility::clearInputBuffer();
 
         cout << "Enter Date of Birth (YYYY-MM-DD): ";
-        is >> emp.dateOfBirth;
+        is >> ws;
+        getline(is, emp.dateOfBirth);
+        while (!Utility::isValidDate(emp.dateOfBirth)) {
+            cout << "Invalid date format! Please enter in YYYY-MM-DD format: ";
+            is >> ws;
+            getline(is, emp.dateOfBirth);
+        }
 
         cout << "Enter Citizenship Number: ";
-        is >> emp.citizenshipNumber;
+        is >> ws;
+        getline(is, emp.citizenshipNumber);
 
         cout << "Enter Phone Number (10 digits): ";
-        is >> emp.phoneNumber;
+        is >> ws;
+        getline(is, emp.phoneNumber);
+        while (!Utility::isValidPhone(emp.phoneNumber)) {
+            cout << "Invalid phone number! Please enter exactly 10 digits: ";
+            is >> ws;
+            getline(is, emp.phoneNumber);
+        }
 
         cout << "Enter Email: ";
-        is >> emp.email;
+        is >> ws;
+        getline(is, emp.email);
+        while (!Utility::isValidEmail(emp.email)) {
+            cout << "Invalid email format! Please enter a valid email: ";
+            is >> ws;
+            getline(is, emp.email);
+        }
 
         cout << "Enter Address: ";
         is >> ws;
@@ -769,16 +803,37 @@ public:
         getline(is, emp.position);
 
         cout << "Enter Joining Date (YYYY-MM-DD): ";
-        is >> emp.joiningDate;
+        is >> ws;
+        getline(is, emp.joiningDate);
+        while (!Utility::isValidDate(emp.joiningDate)) {
+            cout << "Invalid date format! Please enter in YYYY-MM-DD format: ";
+            is >> ws;
+            getline(is, emp.joiningDate);
+        }
 
         cout << "Enter Basic Salary: ";
         is >> emp.basicSalary;
+        while (!Utility::isValidSalary(emp.basicSalary)) {
+            cout << "Invalid salary! Salary must be positive. Please enter again: ";
+            is >> emp.basicSalary;
+        }
+        Utility::clearInputBuffer();
 
         cout << "Enter Username: ";
-        is >> emp.username;
+        is >> ws;
+        getline(is, emp.username);
+        while (emp.username.empty()) {
+            cout << "Username cannot be empty! Please enter again: ";
+            is >> ws;
+            getline(is, emp.username);
+        }
 
         cout << "Enter Password: ";
         emp.password = Utility::getPasswordInput();
+        while (!Utility::isValidPassword(emp.password)) {
+            cout << "Password must be at least 8 characters! Please enter again: ";
+            emp.password = Utility::getPasswordInput();
+        }
 
         emp.status = "Active";
         emp.employeeId = Utility::generateEmployeeID();
