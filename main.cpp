@@ -842,6 +842,39 @@ public:
     }
 };
 
+// ==================== FILE MANAGER EXTENSION ====================
+// Save employee data to text file (must be after Employee class definition)
+static bool saveEmployeesToText(const string& filename, const vector<Employee>& employees) {
+    ofstream outFile(filename);
+    if (!outFile) {
+        cerr << "Error opening file: " << filename << endl;
+        return false;
+    }
+
+    outFile << "Employee ID,Full Name,Gender,Age,Date of Birth,Citizenship Number,Phone Number,Email,Address,Department,Position,Joining Date,Basic Salary,Username,Status" << endl;
+    
+    for (const auto& emp : employees) {
+        outFile << emp.getEmployeeId() << ","
+                << emp.getFullName() << ","
+                << emp.getGender() << ","
+                << emp.getAge() << ","
+                << emp.getDateOfBirth() << ","
+                << emp.getCitizenshipNumber() << ","
+                << emp.getPhoneNumber() << ","
+                << emp.getEmail() << ","
+                << emp.getAddress() << ","
+                << emp.getDepartment() << ","
+                << emp.getPosition() << ","
+                << emp.getJoiningDate() << ","
+                << emp.getBasicSalary() << ","
+                << emp.getUsername() << ","
+                << emp.getStatus() << endl;
+    }
+
+    outFile.close();
+    return true;
+}
+
 // ==================== ATTENDANCE CLASS ====================
 class Attendance {
 private:
@@ -1698,6 +1731,7 @@ private:
     // Save all data to files
     void saveAllData() {
         FileManager::saveToFile("employees.dat", employees);
+        saveEmployeesToText("employees.txt", employees);
         FileManager::saveToFile("attendance.dat", attendanceList);
         FileManager::saveToFile("leave.dat", leaveList);
         FileManager::saveToFile("salary.dat", salaryList);
@@ -1793,21 +1827,42 @@ private:
         Utility::clearScreen();
         Utility::printHeader("ADMIN LOGIN");
 
-        string username, password;
-        cout << "Username: ";
-        cin >> username;
-        cout << "Password: ";
-        password = Utility::getPasswordInput();
+        int attempts = 3;
+        while (attempts > 0) {
+            string username, password;
+            cout << "Username: ";
+            cin >> username;
+            cout << "Password: ";
+            password = Utility::getPasswordInput();
 
-        if (admin.verifyLogin(username, password)) {
-            cout << "\nLogin Successful!" << endl;
-            Utility::pause();
-            return true;
-        } else {
-            cout << "\nInvalid username or password!" << endl;
-            Utility::pause();
-            return false;
+            if (admin.verifyLogin(username, password)) {
+                cout << "\nLogin Successful!" << endl;
+                Utility::pause();
+                return true;
+            } else {
+                attempts--;
+                if (attempts > 0) {
+                    cout << "\n========================================" << endl;
+                    cout << "WARNING: Invalid username or password!" << endl;
+                    cout << "You have " << attempts << " attempt(s) remaining." << endl;
+                    cout << "========================================" << endl;
+                    cout << "\nPress Enter to try again...";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cin.get();
+                    Utility::clearScreen();
+                    Utility::printHeader("ADMIN LOGIN");
+                } else {
+                    cout << "\n========================================" << endl;
+                    cout << "ERROR: Invalid username or password!" << endl;
+                    cout << "No attempts remaining. Access denied." << endl;
+                    cout << "========================================" << endl;
+                    Utility::pause();
+                    return false;
+                }
+            }
         }
+        return false;
     }
 
     // Employee login
