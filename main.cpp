@@ -845,48 +845,34 @@ public:
 // ==================== FILE MANAGER EXTENSION ====================
 // Save employee data to text file (must be after Employee class definition)
 static bool saveEmployeesToText(const string& filename, const vector<Employee>& employees) {
-    try {
-        ofstream outFile(filename);
-        if (!outFile) {
-            cerr << "Error opening file: " << filename << endl;
-            return false;
-        }
-
-        outFile << "Employee ID,Full Name,Gender,Age,Date of Birth,Citizenship Number,Phone Number,Email,Address,Department,Position,Joining Date,Basic Salary,Username,Status" << endl;
-        
-        for (const auto& emp : employees) {
-            outFile << emp.getEmployeeId() << ","
-                    << emp.getFullName() << ","
-                    << emp.getGender() << ","
-                    << emp.getAge() << ","
-                    << emp.getDateOfBirth() << ","
-                    << emp.getCitizenshipNumber() << ","
-                    << emp.getPhoneNumber() << ","
-                    << emp.getEmail() << ","
-                    << emp.getAddress() << ","
-                    << emp.getDepartment() << ","
-                    << emp.getPosition() << ","
-                    << emp.getJoiningDate() << ","
-                    << emp.getBasicSalary() << ","
-                    << emp.getUsername() << ","
-                    << emp.getStatus() << endl;
-            
-            if (!outFile) {
-                cerr << "Error writing to file: " << filename << endl;
-                outFile.close();
-                return false;
-            }
-        }
-
-        outFile.close();
-        return true;
-    } catch (const exception& e) {
-        cerr << "Exception in saveEmployeesToText: " << e.what() << endl;
-        return false;
-    } catch (...) {
-        cerr << "Unknown exception in saveEmployeesToText" << endl;
+    ofstream outFile(filename);
+    if (!outFile) {
+        cerr << "Error opening file: " << filename << endl;
         return false;
     }
+
+    outFile << "Employee ID,Full Name,Gender,Age,Date of Birth,Citizenship Number,Phone Number,Email,Address,Department,Position,Joining Date,Basic Salary,Username,Status" << endl;
+    
+    for (const auto& emp : employees) {
+        outFile << emp.getEmployeeId() << ","
+                << emp.getFullName() << ","
+                << emp.getGender() << ","
+                << emp.getAge() << ","
+                << emp.getDateOfBirth() << ","
+                << emp.getCitizenshipNumber() << ","
+                << emp.getPhoneNumber() << ","
+                << emp.getEmail() << ","
+                << emp.getAddress() << ","
+                << emp.getDepartment() << ","
+                << emp.getPosition() << ","
+                << emp.getJoiningDate() << ","
+                << emp.getBasicSalary() << ","
+                << emp.getUsername() << ","
+                << emp.getStatus() << endl;
+    }
+
+    outFile.close();
+    return true;
 }
 
 // ==================== ATTENDANCE CLASS ====================
@@ -1686,20 +1672,11 @@ private:
 
     // Load all data from files
     void loadAllData() {
-        // Temporarily disable file loading to test if that's the issue
-        cout << "Skipping file loading for testing..." << endl;
-        /*
-        cout << "Loading employees..." << endl;
         employees = FileManager::loadFromFile<Employee>("employees.dat");
-        cout << "Loading attendance..." << endl;
         attendanceList = FileManager::loadFromFile<Attendance>("attendance.dat");
-        cout << "Loading leave..." << endl;
         leaveList = FileManager::loadFromFile<Leave>("leave.dat");
-        cout << "Loading salary..." << endl;
         salaryList = FileManager::loadFromFile<Salary>("salary.dat");
-        cout << "Loading departments..." << endl;
         departments = FileManager::loadFromFile<Department>("department.dat");
-        */
 
         // Update counters based on actual IDs in data
         int maxEmpId = 0;
@@ -1763,14 +1740,14 @@ private:
 
     // Display welcome screen
     void displayWelcomeScreen() {
-        // Utility::clearScreen();  // Disabled to prevent potential crash
+        Utility::clearScreen();
         Utility::printBox();
         Utility::printCentered("EMPLOYMENT ATTENDANCE MANAGEMENT SYSTEM");
         Utility::printCentered("(EAMS)");
         Utility::printBox();
         cout << endl;
         Utility::printLoading("Loading system");
-        // Utility::clearScreen();  // Disabled to prevent potential crash
+        Utility::clearScreen();
     }
 
     // Display main menu
@@ -3320,9 +3297,7 @@ private:
 public:
     // Constructor
     Menu() {
-        cout << "Constructor: Loading data..." << endl;
         loadAllData();
-        cout << "Constructor: Data loaded" << endl;
     }
 
     // Destructor
@@ -3371,35 +3346,8 @@ public:
 
 // ==================== MAIN FUNCTION ====================
 int main() {
-    // Immediate test to see if main is even being called
-    system("echo TEST_OUTPUT");
-    
-    cout << flush;
-    cerr << flush;
-    
-    try {
-        cout << "Starting EAMS..." << endl << flush;
-        cerr << "Debug: About to create Menu" << endl << flush;
-        
-        Menu menu;
-        
-        cerr << "Debug: Menu created" << endl << flush;
-        cout << "Menu created successfully" << endl << flush;
-        
-        menu.run();
-        
-        cout << "Program finished normally" << endl << flush;
-    } catch (const exception& e) {
-        cerr << "Fatal error: " << e.what() << endl << flush;
-        cout << "Press Enter to exit..." << endl << flush;
-        cin.get();
-        return 1;
-    } catch (...) {
-        cerr << "Unknown fatal error occurred" << endl << flush;
-        cout << "Press Enter to exit..." << endl << flush;
-        cin.get();
-        return 1;
-    }
+    Menu menu;
+    menu.run();
 
     return 0;
 }
