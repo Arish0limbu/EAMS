@@ -1686,6 +1686,9 @@ private:
 
     // Load all data from files
     void loadAllData() {
+        // Temporarily disable file loading to test if that's the issue
+        cout << "Skipping file loading for testing..." << endl;
+        /*
         cout << "Loading employees..." << endl;
         employees = FileManager::loadFromFile<Employee>("employees.dat");
         cout << "Loading attendance..." << endl;
@@ -1696,6 +1699,7 @@ private:
         salaryList = FileManager::loadFromFile<Salary>("salary.dat");
         cout << "Loading departments..." << endl;
         departments = FileManager::loadFromFile<Department>("department.dat");
+        */
 
         // Update counters based on actual IDs in data
         int maxEmpId = 0;
@@ -1759,14 +1763,14 @@ private:
 
     // Display welcome screen
     void displayWelcomeScreen() {
-        Utility::clearScreen();
+        // Utility::clearScreen();  // Disabled to prevent potential crash
         Utility::printBox();
         Utility::printCentered("EMPLOYMENT ATTENDANCE MANAGEMENT SYSTEM");
         Utility::printCentered("(EAMS)");
         Utility::printBox();
         cout << endl;
         Utility::printLoading("Loading system");
-        Utility::clearScreen();
+        // Utility::clearScreen();  // Disabled to prevent potential crash
     }
 
     // Display main menu
@@ -3367,20 +3371,32 @@ public:
 
 // ==================== MAIN FUNCTION ====================
 int main() {
+    // Immediate test to see if main is even being called
+    system("echo TEST_OUTPUT");
+    
+    cout << flush;
+    cerr << flush;
+    
     try {
-        cout << "Starting EAMS..." << endl;
+        cout << "Starting EAMS..." << endl << flush;
+        cerr << "Debug: About to create Menu" << endl << flush;
+        
         Menu menu;
-        cout << "Menu created successfully" << endl;
+        
+        cerr << "Debug: Menu created" << endl << flush;
+        cout << "Menu created successfully" << endl << flush;
+        
         menu.run();
-        cout << "Program finished normally" << endl;
+        
+        cout << "Program finished normally" << endl << flush;
     } catch (const exception& e) {
-        cerr << "Fatal error: " << e.what() << endl;
-        cout << "Press Enter to exit...";
+        cerr << "Fatal error: " << e.what() << endl << flush;
+        cout << "Press Enter to exit..." << endl << flush;
         cin.get();
         return 1;
     } catch (...) {
-        cerr << "Unknown fatal error occurred" << endl;
-        cout << "Press Enter to exit...";
+        cerr << "Unknown fatal error occurred" << endl << flush;
+        cout << "Press Enter to exit..." << endl << flush;
         cin.get();
         return 1;
     }
