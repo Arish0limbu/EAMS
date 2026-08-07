@@ -1704,15 +1704,11 @@ private:
 
     // Load all data from files
     void loadAllData() {
-        // Temporarily disable file loading to test if that's causing crash
-        cout << "Skipping file loading for testing..." << endl;
-        /*
         employees = FileManager::loadFromFile<Employee>("employees.dat");
         attendanceList = FileManager::loadFromFile<Attendance>("attendance.dat");
         leaveList = FileManager::loadFromFile<Leave>("leave.dat");
         salaryList = FileManager::loadFromFile<Salary>("salary.dat");
         departments = FileManager::loadFromFile<Department>("department.dat");
-        */
 
         // Update counters based on actual IDs in data
         int maxEmpId = 0;
@@ -1860,7 +1856,7 @@ private:
 
     // Admin login
     bool adminLogin() {
-        Utility::clearScreen();
+        // Utility::clearScreen();  // Disabled
         Utility::printHeader("ADMIN LOGIN");
 
         int attempts = 3;
@@ -1886,7 +1882,7 @@ private:
                     cin.clear();
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     cin.get();
-                    Utility::clearScreen();
+                    // Utility::clearScreen();  // Disabled
                     Utility::printHeader("ADMIN LOGIN");
                 } else {
                     cout << "\n========================================" << endl;
