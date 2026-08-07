@@ -845,34 +845,66 @@ public:
 // ==================== FILE MANAGER EXTENSION ====================
 // Save employee data to text file (must be after Employee class definition)
 static bool saveEmployeesToText(const string& filename, const vector<Employee>& employees) {
-    ofstream outFile(filename);
-    if (!outFile) {
-        cerr << "Error opening file: " << filename << endl;
+    try {
+        ofstream outFile(filename);
+        if (!outFile) {
+            cerr << "Error opening file: " << filename << endl;
+            return false;
+        }
+
+        // Table header with proper formatting
+        outFile << "====================================================================================================================================================================================================================================" << endl;
+        outFile << left << setw(15) << "Employee ID" 
+                << setw(25) << "Full Name" 
+                << setw(10) << "Gender" 
+                << setw(5) << "Age" 
+                << setw(15) << "Date of Birth" 
+                << setw(20) << "Citizenship No" 
+                << setw(15) << "Phone Number" 
+                << setw(30) << "Email" 
+                << setw(30) << "Address" 
+                << setw(20) << "Department" 
+                << setw(20) << "Position" 
+                << setw(15) << "Joining Date" 
+                << setw(12) << "Salary" 
+                << setw(15) << "Username" 
+                << setw(10) << "Status" << endl;
+        outFile << "====================================================================================================================================================================================================================================" << endl;
+        
+        for (const auto& emp : employees) {
+            outFile << left << setw(15) << emp.getEmployeeId() 
+                    << setw(25) << emp.getFullName() 
+                    << setw(10) << emp.getGender() 
+                    << setw(5) << emp.getAge() 
+                    << setw(15) << emp.getDateOfBirth() 
+                    << setw(20) << emp.getCitizenshipNumber() 
+                    << setw(15) << emp.getPhoneNumber() 
+                    << setw(30) << emp.getEmail() 
+                    << setw(30) << emp.getAddress() 
+                    << setw(20) << emp.getDepartment() 
+                    << setw(20) << emp.getPosition() 
+                    << setw(15) << emp.getJoiningDate() 
+                    << setw(12) << emp.getBasicSalary() 
+                    << setw(15) << emp.getUsername() 
+                    << setw(10) << emp.getStatus() << endl;
+            
+            if (!outFile) {
+                cerr << "Error writing to file: " << filename << endl;
+                outFile.close();
+                return false;
+            }
+        }
+
+        outFile << "====================================================================================================================================================================================================================================" << endl;
+        outFile.close();
+        return true;
+    } catch (const exception& e) {
+        cerr << "Exception in saveEmployeesToText: " << e.what() << endl;
+        return false;
+    } catch (...) {
+        cerr << "Unknown exception in saveEmployeesToText" << endl;
         return false;
     }
-
-    outFile << "Employee ID,Full Name,Gender,Age,Date of Birth,Citizenship Number,Phone Number,Email,Address,Department,Position,Joining Date,Basic Salary,Username,Status" << endl;
-    
-    for (const auto& emp : employees) {
-        outFile << emp.getEmployeeId() << ","
-                << emp.getFullName() << ","
-                << emp.getGender() << ","
-                << emp.getAge() << ","
-                << emp.getDateOfBirth() << ","
-                << emp.getCitizenshipNumber() << ","
-                << emp.getPhoneNumber() << ","
-                << emp.getEmail() << ","
-                << emp.getAddress() << ","
-                << emp.getDepartment() << ","
-                << emp.getPosition() << ","
-                << emp.getJoiningDate() << ","
-                << emp.getBasicSalary() << ","
-                << emp.getUsername() << ","
-                << emp.getStatus() << endl;
-    }
-
-    outFile.close();
-    return true;
 }
 
 // ==================== ATTENDANCE CLASS ====================
@@ -2910,13 +2942,12 @@ private:
         cout << "Enter backup file name (without extension): ";
         cin >> backupFile;
 
-        if (FileManager::restoreBackup(backupFile + "_emp", "employees.dat") &&
-            FileManager::restoreBackup(backupFile + "_att", "attendance.dat") &&
-            FileManager::restoreBackup(backupFile + "_lv", "leave.dat") &&
-            FileManager::restoreBackup(backupFile + "_sal", "salary.dat") &&
-            FileManager::restoreBackup(backupFile + "_dept", "department.dat")) {
-            loadAllData();
-            cout << "Data restored successfully!" << endl;
+        if (FileManager::restoreBackup(backupFile + ".bak", "employees.dat") &&
+            FileManager::restoreBackup(backupFile + ".bak", "attendance.dat") &&
+            FileManager::restoreBackup(backupFile + ".bak", "leave.dat") &&
+            FileManager::restoreBackup(backupFile + ".bak", "salary.dat") &&
+            FileManager::restoreBackup(backupFile + ".bak", "department.dat")) {
+            cout << "Restore successful!" << endl;
         } else {
             cout << "Restore failed!" << endl;
         }
@@ -3346,8 +3377,22 @@ public:
 
 // ==================== MAIN FUNCTION ====================
 int main() {
-    Menu menu;
-    menu.run();
+    try {
+        Menu menu;
+        menu.run();
+    } catch (const exception& e) {
+        cerr << "Fatal error: " << e.what() << endl;
+        cout << "Press Enter to exit...";
+        cin.get();
+        return 1;
+    } catch (...) {
+        cerr << "Unknown fatal error occurred" << endl;
+        cout << "Press Enter to exit...";
+        cin.get();
+        return 1;
+    }
 
+    cout << "\nPress Enter to exit...";
+    cin.get();
     return 0;
 }
