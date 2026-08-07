@@ -842,69 +842,36 @@ public:
     }
 };
 
-// ==================== FILE MANAGER EXTENSION ====================
-// Save employee data to text file (must be after Employee class definition)
+// Save employee data to text file
 static bool saveEmployeesToText(const string& filename, const vector<Employee>& employees) {
-    try {
-        ofstream outFile(filename);
-        if (!outFile) {
-            cerr << "Error opening file: " << filename << endl;
-            return false;
-        }
-
-        // Table header with proper formatting
-        outFile << "====================================================================================================================================================================================================================================" << endl;
-        outFile << left << setw(15) << "Employee ID" 
-                << setw(25) << "Full Name" 
-                << setw(10) << "Gender" 
-                << setw(5) << "Age" 
-                << setw(15) << "Date of Birth" 
-                << setw(20) << "Citizenship No" 
-                << setw(15) << "Phone Number" 
-                << setw(30) << "Email" 
-                << setw(30) << "Address" 
-                << setw(20) << "Department" 
-                << setw(20) << "Position" 
-                << setw(15) << "Joining Date" 
-                << setw(12) << "Salary" 
-                << setw(15) << "Username" 
-                << setw(10) << "Status" << endl;
-        outFile << "====================================================================================================================================================================================================================================" << endl;
-        
-        for (const auto& emp : employees) {
-            outFile << left << setw(15) << emp.getEmployeeId() 
-                    << setw(25) << emp.getFullName() 
-                    << setw(10) << emp.getGender() 
-                    << setw(5) << emp.getAge() 
-                    << setw(15) << emp.getDateOfBirth() 
-                    << setw(20) << emp.getCitizenshipNumber() 
-                    << setw(15) << emp.getPhoneNumber() 
-                    << setw(30) << emp.getEmail() 
-                    << setw(30) << emp.getAddress() 
-                    << setw(20) << emp.getDepartment() 
-                    << setw(20) << emp.getPosition() 
-                    << setw(15) << emp.getJoiningDate() 
-                    << setw(12) << emp.getBasicSalary() 
-                    << setw(15) << emp.getUsername() 
-                    << setw(10) << emp.getStatus() << endl;
-            
-            if (!outFile) {
-                cerr << "Error writing to file: " << filename << endl;
-                outFile.close();
-                return false;
-            }
-        }
-
-        outFile << "====================================================================================================================================================================================================================================" << endl;
-        outFile.close();
-        return true;
-    } catch (const exception& e) {
-        cerr << "Exception in saveEmployeesToText: " << e.what() << endl;
-        return false;
-    } catch (...) {
-        cerr << "Unknown exception in saveEmployeesToText" << endl;
+    ofstream outFile(filename);
+    if (!outFile) {
+        cerr << "Error opening file: " << filename << endl;
         return false;
     }
+
+    outFile << "Employee ID,Full Name,Gender,Age,Date of Birth,Citizenship Number,Phone Number,Email,Address,Department,Position,Joining Date,Basic Salary,Username,Status" << endl;
+    
+    for (const auto& emp : employees) {
+        outFile << emp.getEmployeeId() << ","
+                << emp.getFullName() << ","
+                << emp.getGender() << ","
+                << emp.getAge() << ","
+                << emp.getDateOfBirth() << ","
+                << emp.getCitizenshipNumber() << ","
+                << emp.getPhoneNumber() << ","
+                << emp.getEmail() << ","
+                << emp.getAddress() << ","
+                << emp.getDepartment() << ","
+                << emp.getPosition() << ","
+                << emp.getJoiningDate() << ","
+                << emp.getBasicSalary() << ","
+                << emp.getUsername() << ","
+                << emp.getStatus() << endl;
+    }
+
+    outFile.close();
+    return true;
 }
 
 // ==================== ATTENDANCE CLASS ====================
@@ -1772,14 +1739,14 @@ private:
 
     // Display welcome screen
     void displayWelcomeScreen() {
-        // Utility::clearScreen();  // Disabled - may cause crash
+        Utility::clearScreen();
         Utility::printBox();
         Utility::printCentered("EMPLOYMENT ATTENDANCE MANAGEMENT SYSTEM");
         Utility::printCentered("(EAMS)");
         Utility::printBox();
         cout << endl;
         Utility::printLoading("Loading system");
-        // Utility::clearScreen();  // Disabled - may cause crash
+        Utility::clearScreen();
     }
 
     // Display main menu
@@ -1856,45 +1823,24 @@ private:
 
     // Admin login
     bool adminLogin() {
-        // Utility::clearScreen();  // Disabled
+        Utility::clearScreen();
         Utility::printHeader("ADMIN LOGIN");
 
-        int attempts = 3;
-        while (attempts > 0) {
-            string username, password;
-            cout << "Username: ";
-            cin >> username;
-            cout << "Password: ";
-            password = Utility::getPasswordInput();
+        string username, password;
+        cout << "Username: ";
+        cin >> username;
+        cout << "Password: ";
+        password = Utility::getPasswordInput();
 
-            if (admin.verifyLogin(username, password)) {
-                cout << "\nLogin Successful!" << endl;
-                Utility::pause();
-                return true;
-            } else {
-                attempts--;
-                if (attempts > 0) {
-                    cout << "\n========================================" << endl;
-                    cout << "WARNING: Invalid username or password!" << endl;
-                    cout << "You have " << attempts << " attempt(s) remaining." << endl;
-                    cout << "========================================" << endl;
-                    cout << "\nPress Enter to try again...";
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    cin.get();
-                    // Utility::clearScreen();  // Disabled
-                    Utility::printHeader("ADMIN LOGIN");
-                } else {
-                    cout << "\n========================================" << endl;
-                    cout << "ERROR: Invalid username or password!" << endl;
-                    cout << "No attempts remaining. Access denied." << endl;
-                    cout << "========================================" << endl;
-                    Utility::pause();
-                    return false;
-                }
-            }
+        if (admin.verifyLogin(username, password)) {
+            cout << "\nLogin Successful!" << endl;
+            Utility::pause();
+            return true;
+        } else {
+            cout << "\nInvalid username or password!" << endl;
+            Utility::pause();
+            return false;
         }
-        return false;
     }
 
     // Employee login
@@ -2942,12 +2888,13 @@ private:
         cout << "Enter backup file name (without extension): ";
         cin >> backupFile;
 
-        if (FileManager::restoreBackup(backupFile + ".bak", "employees.dat") &&
-            FileManager::restoreBackup(backupFile + ".bak", "attendance.dat") &&
-            FileManager::restoreBackup(backupFile + ".bak", "leave.dat") &&
-            FileManager::restoreBackup(backupFile + ".bak", "salary.dat") &&
-            FileManager::restoreBackup(backupFile + ".bak", "department.dat")) {
-            cout << "Restore successful!" << endl;
+        if (FileManager::restoreBackup(backupFile + "_emp", "employees.dat") &&
+            FileManager::restoreBackup(backupFile + "_att", "attendance.dat") &&
+            FileManager::restoreBackup(backupFile + "_lv", "leave.dat") &&
+            FileManager::restoreBackup(backupFile + "_sal", "salary.dat") &&
+            FileManager::restoreBackup(backupFile + "_dept", "department.dat")) {
+            loadAllData();
+            cout << "Data restored successfully!" << endl;
         } else {
             cout << "Restore failed!" << endl;
         }
@@ -3377,24 +3324,8 @@ public:
 
 // ==================== MAIN FUNCTION ====================
 int main() {
-    // Immediate pause to test if program starts
-    cout << "Program started. Press Enter to continue..." << endl;
-    system("pause");
-    
-    try {
-        Menu menu;
-        menu.run();
-    } catch (const exception& e) {
-        cerr << "Fatal error: " << e.what() << endl;
-        system("pause");
-        return 1;
-    } catch (...) {
-        cerr << "Unknown fatal error occurred" << endl;
-        system("pause");
-        return 1;
-    }
+    Menu menu;
+    menu.run();
 
-    cout << "\nPress Enter to exit...";
-    system("pause");
     return 0;
 }
