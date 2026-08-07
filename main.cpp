@@ -3379,24 +3379,22 @@ public:
 int main() {
     // Immediate pause to test if program starts
     cout << "Program started. Press Enter to continue..." << endl;
-    cin.get();
+    system("pause");
     
     try {
         Menu menu;
         menu.run();
     } catch (const exception& e) {
         cerr << "Fatal error: " << e.what() << endl;
-        cout << "Press Enter to exit...";
-        cin.get();
+        system("pause");
         return 1;
     } catch (...) {
         cerr << "Unknown fatal error occurred" << endl;
-        cout << "Press Enter to exit...";
-        cin.get();
+        system("pause");
         return 1;
     }
 
     cout << "\nPress Enter to exit...";
-    cin.get();
+    system("pause");
     return 0;
 }
