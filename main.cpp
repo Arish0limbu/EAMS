@@ -1704,11 +1704,15 @@ private:
 
     // Load all data from files
     void loadAllData() {
+        // Temporarily disable file loading to test if that's causing crash
+        cout << "Skipping file loading for testing..." << endl;
+        /*
         employees = FileManager::loadFromFile<Employee>("employees.dat");
         attendanceList = FileManager::loadFromFile<Attendance>("attendance.dat");
         leaveList = FileManager::loadFromFile<Leave>("leave.dat");
         salaryList = FileManager::loadFromFile<Salary>("salary.dat");
         departments = FileManager::loadFromFile<Department>("department.dat");
+        */
 
         // Update counters based on actual IDs in data
         int maxEmpId = 0;
@@ -1772,14 +1776,14 @@ private:
 
     // Display welcome screen
     void displayWelcomeScreen() {
-        Utility::clearScreen();
+        // Utility::clearScreen();  // Disabled - may cause crash
         Utility::printBox();
         Utility::printCentered("EMPLOYMENT ATTENDANCE MANAGEMENT SYSTEM");
         Utility::printCentered("(EAMS)");
         Utility::printBox();
         cout << endl;
         Utility::printLoading("Loading system");
-        Utility::clearScreen();
+        // Utility::clearScreen();  // Disabled - may cause crash
     }
 
     // Display main menu
@@ -3377,6 +3381,10 @@ public:
 
 // ==================== MAIN FUNCTION ====================
 int main() {
+    // Immediate pause to test if program starts
+    cout << "Program started. Press Enter to continue..." << endl;
+    cin.get();
+    
     try {
         Menu menu;
         menu.run();
